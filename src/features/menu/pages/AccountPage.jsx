@@ -1,0 +1,10 @@
+import { useState } from 'react'
+import { authenticate } from '../services/menuApi'
+import { useAuth } from '../hooks/AuthContext'
+export default function AccountPage() {
+ const { session, setSession } = useAuth()
+ const [action, setAction] = useState('login'); const [form, setForm] = useState({ name: '', email: '', password: '' }); const [message, setMessage] = useState(''); const [busy, setBusy] = useState(false)
+ async function submit(e) { e.preventDefault(); setBusy(true); setMessage(''); try { const result = await authenticate(action, form); if (action === 'login') setSession(result); setMessage(action === 'login' ? `Welcome, ${result.user.name}. Signed in as ${result.user.role}.` : 'Account created. You can now sign in.'); setForm({ name: '', email: '', password: '' }) } catch (error) { setMessage(error.message) } finally { setBusy(false) } }
+ if (session) return <section className="panel"><h1>Welcome, {session.user.name}</h1><p>Signed in as {session.user.role}. Your session ends when you refresh the page.</p><button onClick={() => { setSession(null); setMessage('') }}>Sign out</button></section>
+ return <section className="panel"><span className="eyebrow">WELCOME TO CAMPUSEATS</span><h1>{action === 'login' ? 'Sign in' : 'Create an account'}</h1><form onSubmit={submit}>{(action === 'register' ? ['name', 'email', 'password'] : ['email', 'password']).map(name => <label key={name}>{name}<input required minLength={name === 'password' && action === 'register' ? 8 : undefined} type={name === 'name' ? 'text' : name} value={form[name]} onChange={e => setForm({ ...form, [name]: e.target.value })} autoComplete={name === 'password' ? action === 'login' ? 'current-password' : 'new-password' : name} /></label>)}<button disabled={busy}>{busy ? 'Please wait…' : action === 'login' ? 'Sign in' : 'Register'}</button></form><p role="status">{message}</p><button className="text-button" onClick={() => { setAction(action === 'login' ? 'register' : 'login'); setMessage('') }}>{action === 'login' ? 'New here? Create an account' : 'Already registered? Sign in'}</button></section>
+}

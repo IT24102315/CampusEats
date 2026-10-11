@@ -1,0 +1,8 @@
+{
+  "ConnectionStrings__Default": "",
+  "FrontendOrigin": "http://localhost:5173",
+  "ASPNETCORE_ENVIRONMENT": "Development",
+  "Jwt__Issuer": "CampusEats",
+  "Jwt__Audience": "CampusEatsUsers",
+  "PORT": "8080"
+}
