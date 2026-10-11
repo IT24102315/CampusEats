@@ -1,0 +1,27 @@
+// Merge this configuration into the real API's Program.cs.
+var builder = WebApplication.CreateBuilder(args);
+
+// Honor the hosting platform's port; use 8080 locally if PORT is absent.
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+var frontendOrigin = builder.Configuration["FrontendOrigin"]
+    ?? throw new InvalidOperationException("Set FrontendOrigin to the deployed frontend origin.");
+
+builder.Services.AddControllers();
+builder.Services.AddCors(options => options.AddPolicy("Frontend", policy =>
+    policy.WithOrigins(frontendOrigin)
+        .AllowAnyHeader()
+        .AllowAnyMethod()));
+
+// ASP.NET Core's configuration reads environment variables automatically:
+// builder.Configuration.GetConnectionString("Default") -> ConnectionStrings__Default
+// builder.Configuration["Jwt:Key"] -> Jwt__Key
+// Preserve the real API's database and JWT authentication registrations here.
+
+var app = builder.Build();
+app.UseRouting();
+app.UseCors("Frontend");
+// Preserve UseAuthentication()/UseAuthorization() here if configured by the API.
+app.MapControllers();
+app.Run();
